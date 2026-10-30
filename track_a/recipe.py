@@ -21,6 +21,7 @@ leaderboard.
 import torch
 import torch.nn.functional as F
 from torchvision import transforms as T
+import collections
 
 BATCH_SIZE = 64
 
@@ -47,7 +48,8 @@ def sample_weights(cities, paths):
     is drawn twice as often as one with weight 1. Return None to go through
     the selection in a new random order each time, every photo once per round.
     """
-    return None
+    counts = collections.Counter(cities)
+    return [1.0 / counts[city] for city in cities]
 
 
 def make_optimizer(model):
