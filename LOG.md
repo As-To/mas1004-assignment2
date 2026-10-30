@@ -41,16 +41,6 @@ I also thought about traffic direction as a possible clue. In Japan, cars drive 
 
 Next, I plan to look at the model's mistakes, as described in Step 3, to better understand which cities it confuses and whether there are any patterns in the errors.
 
-## Step 3 : balanced (Track A)
-
-- changed: In `sample_weights`, counted the photos for each city and returned a weight of `1 / city_count` for each photo, so every city is drawn equally often. No other training-recipe change was made.
-- why: I wanted to test whether drawing every city equally often would improve the baseline before making another change.
-- validation: 0.5062 (before: 0.4936; change: +0.0126)
-- per-city accuracy: Seoul 0.4982 (before: 0.5721, -0.0739); Busan 0.4475 (before: 0.3705, +0.0770); Tokyo 0.5017 (before: 0.6238, -0.1221); Osaka 0.4718 (before: 0.3548, +0.1170); Taipei 0.6121 (before: 0.5466, +0.0655)
-- what it means: The overall validation score increased by 0.0126. Accuracy increased for Busan, Osaka and Taipei, but decreased for Seoul and Tokyo. The largest increase was for Osaka, and the largest decrease was for Tokyo.
-
-Next, I plan to decide what to try based on the mistake sheets and these per-city results.
-
 ## Step 3 – Baseline mistake analysis
 
 I looked at the most confidently misclassified validation photos for all five cities and noticed two main patterns.
@@ -80,3 +70,22 @@ Busan: images 17, 19, 31 (ordinary urban scenes)
 Tokyo: images 4, 21 (cars nit in the road)
 Osaka: images 2, 9, 13 (ordinary streets and roads)
 Taipei: images 9, 13, 16 (similar-looking roads)
+
+
+## Step 3 : balanced (Track A)
+
+<30/10/2026> <balanced> (Track A)
+- changed: In `sample_weights`, counted the photos for each city and returned a weight of `1 / city_count` for each photo, so every city is drawn equally often. No other training-recipe change was made.
+- why: I wanted to test whether drawing every city equally often would improve the baseline before making another change.
+- validation: 0.5062 (before: 0.4936; change: +0.0126)
+- per-city accuracy: Seoul 0.4982 (before: 0.5721, -0.0739); Busan 0.4475 (before: 0.3705, +0.0770); Tokyo 0.5017 (before: 0.6238, -0.1221); Osaka 0.4718 (before: 0.3548, +0.1170); Taipei 0.6121 (before: 0.5466, +0.0655)
+- what it means: The overall validation score increased by 0.0126. Accuracy increased for Busan, Osaka and Taipei, but decreased for Seoul and Tokyo. I expected balancing the cities to help Busan and Osaka, since they had some of the lowest scores in the baseline, and it did. But I was surprised by how much Seoul and Tokyo dropped. So I'm wondering if giving every city exactly the same weight is a bit too aggressive. I might try a less extreme balancing strategy later. For now, I want to test whether removing horizontal flipping helps preserve useful clues like signs and road layouts, without changing how often each city is sampled.
+
+## Step 4 : balanced_no_flip (Track A)
+
+<30/10/2026> <balanced_no_flip> (Track A)
+- changed: Removed only `T.RandomHorizontalFlip()` from `train_transform()`. The equal-city sampling weights from the balanced recipe were kept exactly as they were.
+- why: I wanted to test the effect of removing horizontal flips while keeping the balanced recipe unchanged in every other respect.
+- validation: 0.4992 (before: 0.5062; change: -0.0070); baseline seed 0: 0.4936 (change vs baseline: +0.0056)
+- per-city accuracy: Seoul 0.5125 (balanced before: 0.4982, +0.0143; baseline: 0.5721, -0.0596); Busan 0.4396 (balanced before: 0.4475, -0.0079; baseline: 0.3705, +0.0691); Tokyo 0.5045 (balanced before: 0.5017, +0.0028; baseline: 0.6238, -0.1193); Osaka 0.4398 (balanced before: 0.4718, -0.0320; baseline: 0.3548, +0.0850); Taipei 0.5996 (balanced before: 0.6121, -0.0125; baseline: 0.5466, +0.0530)
+- what it means:
