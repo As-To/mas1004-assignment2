@@ -81,11 +81,28 @@ Taipei: images 9, 13, 16 (similar-looking roads)
 - per-city accuracy: Seoul 0.4982 (before: 0.5721, -0.0739); Busan 0.4475 (before: 0.3705, +0.0770); Tokyo 0.5017 (before: 0.6238, -0.1221); Osaka 0.4718 (before: 0.3548, +0.1170); Taipei 0.6121 (before: 0.5466, +0.0655)
 - what it means: The overall validation score increased by 0.0126. Accuracy increased for Busan, Osaka and Taipei, but decreased for Seoul and Tokyo. I expected balancing the cities to help Busan and Osaka, since they had some of the lowest scores in the baseline, and it did. But I was surprised by how much Seoul and Tokyo dropped. So I'm wondering if giving every city exactly the same weight is a bit too aggressive. I might try a less extreme balancing strategy later. For now, I want to test whether removing horizontal flipping helps preserve useful clues like signs and road layouts, without changing how often each city is sampled.
 
-## Step 4 : balanced_no_flip (Track A)
 
 <30/10/2026> <balanced_no_flip> (Track A)
 - changed: Removed only `T.RandomHorizontalFlip()` from `train_transform()`. The equal-city sampling weights from the balanced recipe were kept exactly as they were.
-- why: I wanted to test the effect of removing horizontal flips while keeping the balanced recipe unchanged in every other respect.
+- why: I wanted to test the effect of removing horizontal flips while keeping the balanced recipe.
 - validation: 0.4992 (before: 0.5062; change: -0.0070); baseline seed 0: 0.4936 (change vs baseline: +0.0056)
 - per-city accuracy: Seoul 0.5125 (balanced before: 0.4982, +0.0143; baseline: 0.5721, -0.0596); Busan 0.4396 (balanced before: 0.4475, -0.0079; baseline: 0.3705, +0.0691); Tokyo 0.5045 (balanced before: 0.5017, +0.0028; baseline: 0.6238, -0.1193); Osaka 0.4398 (balanced before: 0.4718, -0.0320; baseline: 0.3548, +0.0850); Taipei 0.5996 (balanced before: 0.6121, -0.0125; baseline: 0.5466, +0.0530)
+- what it means: I expected removing horizontal flipping to help preserve geographical clues such as signs and road layouts. However, the overall accuracy dropped by 0.7 percentage points compared to balanced (from 0.5062 to 0.4992), with the largest drop in Osaka (-3.2 percentage points). However, I've got to say that the difference is qute small. My guess is that the current cropping is quite aggressive, so the model might not see enough signs or road layouts for their orientation to matter much. I'm wondering whether removing flipping could become more useful if I first make cropping less aggressive, allowing the model to see more of the original scene (the scale of the crop in the baseline is 0.35).Maybe the current cropping is too aggressive because by removing too much of the surrounding environment, it could make geographical clues harder to learn. For now, I'll keep flipping and test whether less aggressive cropping helps preserve useful geographical context.
+
+
+<31/10/2026> <balanced_crop_07> (Track A)
+- changed: Changed only `T.RandomResizedCrop()` scale from `(0.35, 1.0)` to `(0.7, 1.0)`. Horizontal flipping was enabled again, and the equal-city sampling weights from the balanced recipe were kept exactly as they were.
+- why: I wanted to test whether less aggressive cropping would help preserve useful geographical context.
+- validation: 0.4885 (before: 0.5062; change: -0.0177); baseline seed 0: 0.4936 (change vs baseline: -0.0051)
+- per-city accuracy: Seoul 0.5101 (balanced before: 0.4982, +0.0119; baseline: 0.5721, -0.0620); Busan 0.4237 (balanced before: 0.4475, -0.0238; baseline: 0.3705, +0.0532); Tokyo 0.5001 (balanced before: 0.5017, -0.0016; baseline: 0.6238, -0.1237); Osaka 0.4243 (balanced before: 0.4718, -0.0475; baseline: 0.3548, +0.0695); Taipei 0.5840 (balanced before: 0.6121, -0.0281; baseline: 0.5466, +0.0374)
 - what it means:
+
+<31/10/2026> <balanced_crop_05> (Track A)
+
+<31/10/2026> <balanced_crop_07_no_flip> (Track A)
+
+<31/10/2026> <street_filter> (Track A) -- deleting some of the photos to test the consequences 
+
+<31/10/2026> <jitter_01> (Track A)
+
+

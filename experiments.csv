@@ -3,3 +3,4 @@ finished,track,tag,seed,official_budget,budget,val_score,seoul,busan,tokyo,osaka
 2026-10-28T18:00:49,A,baseline,1,True,249984,0.4998,0.57,0.4,0.6156,0.3806,0.5328,1854.0,cuda,all training photos,17ac485223fa,,c447410
 2026-10-30T13:10:42,A,balanced,0,True,249984,0.5062,0.4982,0.4475,0.5017,0.4718,0.6121,1879.6,cuda,all training photos,68491fd2fed2,,98d0695
 2026-10-30T15:50:16,A,balanced_no_flip,0,True,249984,0.4992,0.5125,0.4396,0.5045,0.4398,0.5996,2225.3,cuda,all training photos,57726ae8f169,,de2038e
+2026-10-31T15:20:08,A,balanced_crop_07,0,True,249984,0.4885,0.5101,0.4237,0.5001,0.4243,0.584,2420.6,cuda,all training photos,e09eb678d205,,dee9566
