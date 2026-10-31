@@ -1,1 +1,1 @@
-python src/official.py --tag balanced_crop_07
+python src/curate.py suspects results/balanced_crop_07_seed0/model.onnx --every 4
