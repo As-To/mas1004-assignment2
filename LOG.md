@@ -100,9 +100,13 @@ I noticed that many validation mistakes involve outdoor scenes, while some train
 
 <01/11/2026> <filter_indoors_busan> (Track A)
 
-- changed: Planned to remove selected indoor training photos with little or no visible geographical information, while keeping the balanced recipe unchanged. No photos have been removed yet.
+- changed: Removed the 534 explicitly selected Busan training photos with little or no visible geographical information, while keeping the balanced recipe unchanged.
 
 - why: When looking at the validation mistakes, I noticed that the model often struggles with outdoor scenes. At the same time, some training photos show indoor spaces with very few clues about their location. Since the training budget is fixed at 250,000 images, I wonder if removing these photos could help the model spend more time learning from street scenes.
+
+- validation: 0.5134 (before: 0.5062; change: +0.0072)
+- per-city accuracy: Seoul 0.5331 (before: 0.4982, +0.0349); Busan 0.4554 (before: 0.4475, +0.0079); Tokyo 0.5102 (before: 0.5017, +0.0085); Osaka 0.4577 (before: 0.4718, -0.0141); Taipei 0.6108 (before: 0.6121, -0.0013)
+- what it means:
 
 <01/11/2026> <balanced_crop_05> (Track A)
 - changed: Changed only `T.RandomResizedCrop()` scale from `(0.35, 1.0)` to `(0.5, 1.0)`. Balanced equal-city sampling and horizontal flipping were kept unchanged.
@@ -110,6 +114,8 @@ I noticed that many validation mistakes involve outdoor scenes, while some train
 - validation: 0.5034 (before: 0.5062; change: -0.0028)
 - per-city accuracy: Seoul 0.5072 (before: 0.4982, +0.0090); Busan 0.4367 (before: 0.4475, -0.0108); Tokyo 0.5305 (before: 0.5017, +0.0288); Osaka 0.4525 (before: 0.4718, -0.0193); Taipei 0.5898 (before: 0.6121, -0.0223)
 - what it means:
+
+<01/11/2026> <filter_indoors_busan> (Track A)
 
 <31/10/2026> <balanced_crop_07_no_flip> (Track A)
 
