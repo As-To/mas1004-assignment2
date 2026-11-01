@@ -95,9 +95,21 @@ Taipei: images 9, 13, 16 (similar-looking roads)
 - why: I wanted to test whether less aggressive cropping would help preserve useful geographical context.
 - validation: 0.4885 (before: 0.5062; change: -0.0177); baseline seed 0: 0.4936 (change vs baseline: -0.0051)
 - per-city accuracy: Seoul 0.5101 (balanced before: 0.4982, +0.0119; baseline: 0.5721, -0.0620); Busan 0.4237 (balanced before: 0.4475, -0.0238; baseline: 0.3705, +0.0532); Tokyo 0.5001 (balanced before: 0.5017, -0.0016; baseline: 0.6238, -0.1237); Osaka 0.4243 (balanced before: 0.4718, -0.0475; baseline: 0.3548, +0.0695); Taipei 0.5840 (balanced before: 0.6121, -0.0281; baseline: 0.5466, +0.0374)
-- what it means:
+- what it means: I expected less aggressive cropping to help the model by keeping more geographical context. However, accuracy dropped by 1.82 percentage points compared to balanced (from 0.5062 to 0.4880). My guess is that stronger cropping actually helps the model learn from smaller parts of the images and creates more variety during training. Since the model sees each photo several times (around 6 times), this variety might help prevent memorization. For now, I'll keep the original cropping and focus on removing training photos that contain little geographical information.
+I noticed that many validation mistakes involve outdoor scenes, while some training photos contain little geographical information. Since the training budget is fixed, I wonder whether removing these less useful photos could help the model spend more time learning from street scenes.
 
-<31/10/2026> <balanced_crop_05> (Track A)
+<01/11/2026> <filter_indoors> (Track A)
+
+- changed: Planned to remove selected indoor training photos with little or no visible geographical information, while keeping the balanced recipe unchanged. No photos have been removed yet.
+
+- why: When looking at the validation mistakes, I noticed that the model often struggles with outdoor scenes. At the same time, some training photos show indoor spaces with very few clues about their location. Since the training budget is fixed at 250,000 images, I wonder if removing these photos could help the model spend more time learning from street scenes.
+
+<01/11/2026> <balanced_crop_05> (Track A)
+- changed: Changed only `T.RandomResizedCrop()` scale from `(0.35, 1.0)` to `(0.5, 1.0)`. Balanced equal-city sampling and horizontal flipping were kept unchanged.
+- why: I wanted to test whether less aggressive cropping would preserve more useful geographical context.
+- validation: 0.5034 (before: 0.5062; change: -0.0028)
+- per-city accuracy: Seoul 0.5072 (before: 0.4982, +0.0090); Busan 0.4367 (before: 0.4475, -0.0108); Tokyo 0.5305 (before: 0.5017, +0.0288); Osaka 0.4525 (before: 0.4718, -0.0193); Taipei 0.5898 (before: 0.6121, -0.0223)
+- what it means:
 
 <31/10/2026> <balanced_crop_07_no_flip> (Track A)
 
