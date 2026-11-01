@@ -1,1 +1,1 @@
-python src/official.py --tag balanced_crop_05
+python src/official.py --tag filter_indoors_busan
