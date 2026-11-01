@@ -98,7 +98,7 @@ Taipei: images 9, 13, 16 (similar-looking roads)
 - what it means: I expected less aggressive cropping to help the model by keeping more geographical context. However, accuracy dropped by 1.82 percentage points compared to balanced (from 0.5062 to 0.4880). My guess is that stronger cropping actually helps the model learn from smaller parts of the images and creates more variety during training. Since the model sees each photo several times (around 6 times), this variety might help prevent memorization. For now, I'll keep the original cropping and focus on removing training photos that contain little geographical information.
 I noticed that many validation mistakes involve outdoor scenes, while some training photos contain little geographical information. Since the training budget is fixed, I wonder whether removing these less useful photos could help the model spend more time learning from street scenes.
 
-<01/11/2026> <filter_indoors> (Track A)
+<01/11/2026> <filter_indoors_busan> (Track A)
 
 - changed: Planned to remove selected indoor training photos with little or no visible geographical information, while keeping the balanced recipe unchanged. No photos have been removed yet.
 
