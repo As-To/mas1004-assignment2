@@ -1,1 +1,1 @@
-python src/official.py --tag filter_busan_press
+python src/curate.py suspects results/filter_busan_press_seed0/model.onnx --every 4
