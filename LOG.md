@@ -120,15 +120,20 @@ Overall, the result makes me want to continue filtering Busan photos, but I can'
 
 <02/11/2026> <filter_busan_extended> (Track A)
 
-The suspects for busan show some remaning indoors photos, and some photos of car that have probably been taken during some sort of car ehibiition. I want to see wether deleting those could improve the model. 
-
 - changed: Removed 149 additional explicitly selected Busan photos—6 indoor photos and 143 car-focused photos—while preserving the previous 534 exclusions and the balanced recipe.
 - why: The suspects for Busan showed some remaining indoor photos and some photos of cars that were probably taken during some sort of car exhibition. I wanted to see whether deleting those could improve the model.
 - validation: 0.4997 (before: 0.5134; change: -0.0137)
 - per-city accuracy: Seoul 0.5113 (before: 0.5331, -0.0218); Busan 0.4475 (before: 0.4554, -0.0079); Tokyo 0.5022 (before: 0.5102, -0.0080); Osaka 0.4309 (before: 0.4577, -0.0268); Taipei 0.6068 (before: 0.6108, -0.0040)
-- what it means:
+- what it means: The overall validation accuracy dropped from 0.5134 to around 0.500, and all five cities performed worse. This surprised me because I expected removing more photos with little geographical information to help.
+One possible explanation is that some of the car photos I removed were actually useful. For example, they showed Korean car brands like Hyundai or Kia, which might have helped the model recognize Korean environments, even if the photos didn't show much of the city itself. Another possibility is that the validation set contains similar car exhibition photos, so removing these examples from training may have made it harder for the model to recognize them.
 
-<02/11/2026> <filter_busan_journalistic> (Track A)
+<02/11/2026> <filter_busan_press> (Track A)
+
+- changed: Removed manually selected Busan press conference photos while preserving the 534 exclusions from `filter_indoors_busan` and keeping the balanced recipe unchanged.
+- why: While reviewing the Busan training photos, I noticed that there were a lot of press conference images. Most of them showed people speaking in front of cameras or microphones, without much geographical information. I wanted to see whether removing these photos would help the model focus on more useful visual features for identifying Busan.
+- validation: 0.5088 (before: 0.5134; change: -0.0046)
+- per-city accuracy: Seoul 0.5265 (before: 0.5331, -0.0066); Busan 0.4676 (before: 0.4554, +0.0122); Tokyo 0.4983 (before: 0.5102, -0.0119); Osaka 0.4516 (before: 0.4577, -0.0061); Taipei 0.6001 (before: 0.6108, -0.0107)
+- what it means: 
 
 <02/11/2026> <filter_indoors_osaka> (Track A)
 
