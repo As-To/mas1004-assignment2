@@ -95,8 +95,16 @@ Taipei: images 9, 13, 16 (similar-looking roads)
 - why: I wanted to test whether less aggressive cropping would help preserve useful geographical context.
 - validation: 0.4885 (before: 0.5062; change: -0.0177); baseline seed 0: 0.4936 (change vs baseline: -0.0051)
 - per-city accuracy: Seoul 0.5101 (balanced before: 0.4982, +0.0119; baseline: 0.5721, -0.0620); Busan 0.4237 (balanced before: 0.4475, -0.0238; baseline: 0.3705, +0.0532); Tokyo 0.5001 (balanced before: 0.5017, -0.0016; baseline: 0.6238, -0.1237); Osaka 0.4243 (balanced before: 0.4718, -0.0475; baseline: 0.3548, +0.0695); Taipei 0.5840 (balanced before: 0.6121, -0.0281; baseline: 0.5466, +0.0374)
-- what it means: I expected less aggressive cropping to help the model by keeping more geographical context. However, accuracy dropped by 1.82 percentage points compared to balanced (from 0.5062 to 0.4880). My guess is that stronger cropping actually helps the model learn from smaller parts of the images and creates more variety during training. Since the model sees each photo several times (around 6 times), this variety might help prevent memorization. For now, I'll keep the original cropping and focus on removing training photos that contain little geographical information.
+- what it means: I expected less aggressive cropping to help the model by keeping more geographical context. However, accuracy dropped by 1.77 percentage points compared to balanced (from 0.5062 to 0.4880). My guess is that stronger cropping actually helps the model learn from smaller parts of the images and creates more variety during training. Since the model sees each photo several times (around 6 times), this variety might help prevent memorization. For now, I'll keep the original cropping and focus on removing training photos that contain little geographical information.
 I noticed that many validation mistakes involve outdoor scenes, while some training photos contain little geographical information. Since the training budget is fixed, I wonder whether removing these less useful photos could help the model spend more time learning from street scenes.
+
+<01/11/2026> <balanced_crop_05> (Track A)
+- changed: Changed only `T.RandomResizedCrop()` scale from `(0.35, 1.0)` to `(0.5, 1.0)`. Balanced equal-city sampling and horizontal flipping were kept unchanged.
+- why: I wanted to test whether less aggressive cropping would preserve more useful geographical context.
+- validation: 0.5034 (before: 0.5062; change: -0.0028)
+- per-city accuracy: Seoul 0.5072 (before: 0.4982, +0.0090); Busan 0.4367 (before: 0.4475, -0.0108); Tokyo 0.5305 (before: 0.5017, +0.0288); Osaka 0.4525 (before: 0.4718, -0.0193); Taipei 0.5898 (before: 0.6121, -0.0223)
+- what it means: The overall validation accuracy decreased slightly, by 0.28 percentage points. So reducing the cropping from 0.35 to 0.5 didn't really help overall. However, Tokyo improved by 2.88 percentage points, which I found interesting. Maybe keeping more of the original image helps the model recognize Tokyo, while stronger cropping works better for some other cities.
+This makes me wonder whether using different cropping scales for different cities could be useful. However, since the overall result is still worse than balanced, I don't think it's worth keeping this change for now. I'll go back to the original cropping scale of 0.35.
 
 <01/11/2026> <filter_indoors_busan> (Track A)
 
@@ -106,16 +114,31 @@ I noticed that many validation mistakes involve outdoor scenes, while some train
 
 - validation: 0.5134 (before: 0.5062; change: +0.0072)
 - per-city accuracy: Seoul 0.5331 (before: 0.4982, +0.0349); Busan 0.4554 (before: 0.4475, +0.0079); Tokyo 0.5102 (before: 0.5017, +0.0085); Osaka 0.4577 (before: 0.4718, -0.0141); Taipei 0.6108 (before: 0.6121, -0.0013)
+- what it means: The overall validation accuracy increased by 0.72 percentage points, which is encouraging, although the improvement is quite small. Busan improved, as I hoped, but what surprised me was that Seoul improved even more (+3.49 percentage points). My guess is that by removing less useful Busan photos, the model might have learned to distinguish Busan from Seoul a little better, so it could be confusing the two cities less often. I would need to check the confusion matrix to confirm this.
+Osaka's accuracy decreased by 1.41 percentage points. I'm not really sure why. Maybe changing the Busan training data also affected how the model distinguishes other cities, or maybe this is just some variation between training runs.
+Overall, the result makes me want to continue filtering Busan photos, but I can't say yet whether the improvement is reliable.
+
+<02/11/2026> <filter_busan_extended> (Track A)
+
+The suspects for busan show some remaning indoors photos, and some photos of car that have probably been taken during some sort of car ehibiition. I want to see wether deleting those could improve the model. 
+
+- changed: Removed 149 additional explicitly selected Busan photos—6 indoor photos and 143 car-focused photos—while preserving the previous 534 exclusions and the balanced recipe.
+- why: The suspects for Busan showed some remaining indoor photos and some photos of cars that were probably taken during some sort of car exhibition. I wanted to see whether deleting those could improve the model.
+- validation: 0.4997 (before: 0.5134; change: -0.0137)
+- per-city accuracy: Seoul 0.5113 (before: 0.5331, -0.0218); Busan 0.4475 (before: 0.4554, -0.0079); Tokyo 0.5022 (before: 0.5102, -0.0080); Osaka 0.4309 (before: 0.4577, -0.0268); Taipei 0.6068 (before: 0.6108, -0.0040)
 - what it means:
 
-<01/11/2026> <balanced_crop_05> (Track A)
-- changed: Changed only `T.RandomResizedCrop()` scale from `(0.35, 1.0)` to `(0.5, 1.0)`. Balanced equal-city sampling and horizontal flipping were kept unchanged.
-- why: I wanted to test whether less aggressive cropping would preserve more useful geographical context.
-- validation: 0.5034 (before: 0.5062; change: -0.0028)
-- per-city accuracy: Seoul 0.5072 (before: 0.4982, +0.0090); Busan 0.4367 (before: 0.4475, -0.0108); Tokyo 0.5305 (before: 0.5017, +0.0288); Osaka 0.4525 (before: 0.4718, -0.0193); Taipei 0.5898 (before: 0.6121, -0.0223)
-- what it means:
+<02/11/2026> <filter_busan_journalistic> (Track A)
 
-<01/11/2026> <filter_indoors_busan> (Track A)
+<02/11/2026> <filter_indoors_osaka> (Track A)
+
+<02/11/2026> <filter_indoors_seoul> (Track A)
+
+<02/11/2026> <filter_indoors_taipei> (Track A)
+
+<02/11/2026> <filter_indoors_tokyo> (Track A)
+
+<02/11/2026> <learning_rate> (Track A)
 
 <31/10/2026> <balanced_crop_07_no_flip> (Track A)
 
