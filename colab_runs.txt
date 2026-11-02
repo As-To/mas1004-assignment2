@@ -1,1 +1,1 @@
-python src/official.py --tag filter_busan_firefighters
+python src/curate.py suspects results/filter_busan_firefighters_seed0/model.onnx --every 4
