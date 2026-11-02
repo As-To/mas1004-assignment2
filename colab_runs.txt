@@ -1,1 +1,1 @@
-python src/curate.py suspects results/filter_indoors_busan_seed0/model.onnx --every 4
+python src/official.py --tag filter_busan_extended
