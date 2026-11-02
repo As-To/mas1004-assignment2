@@ -8,3 +8,4 @@ finished,track,tag,seed,official_budget,budget,val_score,seoul,busan,tokyo,osaka
 2026-11-01T16:50:37,A,filter_indoors_busan,0,True,249984,0.5134,0.5331,0.4554,0.5102,0.4577,0.6108,1920.6,cuda,"selection.csv, 43723 rows",68491fd2fed2,5f68d2876f89,3dec79e
 2026-11-02T12:48:05,A,filter_busan_extended,0,True,249984,0.4997,0.5113,0.4475,0.5022,0.4309,0.6068,1927.5,cuda,"selection.csv, 43574 rows",68491fd2fed2,b2f084bf2e45,38855e3
 2026-11-02T14:22:33,A,filter_busan_press,0,True,249984,0.5088,0.5265,0.4676,0.4983,0.4516,0.6001,1859.6,cuda,"selection.csv, 43657 rows",68491fd2fed2,5a152dbd7916,2f16397
+2026-11-02T15:39:27,A,filter_busan_firefighters,0,True,249984,0.5034,0.4977,0.4417,0.5187,0.4384,0.6206,1958.2,cuda,"selection.csv, 43529 rows",68491fd2fed2,52909949acf5,7bf4002
