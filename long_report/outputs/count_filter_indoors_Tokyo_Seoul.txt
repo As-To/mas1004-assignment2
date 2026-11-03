@@ -1,0 +1,8 @@
+city      selected     of   by source
+seoul        10852  11274   commons 6348, osv5m 320, youtube 4184
+busan         4657   5191   commons 3067, youtube 1590
+tokyo        13178  13347   commons 6806, osv5m 1916, youtube 4456
+osaka         7200   7200   commons 5347, osv5m 341, youtube 1512
+taipei        7245   7245   commons 5668, osv5m 533, youtube 1044
+total 43132 rows
+dropped: 1125 indoor photo with little or no visible geographical information
