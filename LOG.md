@@ -152,6 +152,14 @@ One possible explanation is that some of the car photos I removed were actually 
 - per-city accuracy: Seoul 0.5006 (before: 0.5331, -0.0325); Busan 0.4669 (before: 0.4554, +0.0115); Tokyo 0.5233 (before: 0.5102, +0.0131); Osaka 0.4615 (before: 0.4577, +0.0038); Taipei 0.6139 (before: 0.6108, +0.0031)
 - what it means: 
 
+<03/11/2026> <filter_museum_objects> (Track A)
+
+- changed: Removed 454 additional manually selected museum-object photos from Busan, Seoul, and Tokyo while preserving all previous exclusions and the balanced recipe.
+- why: I wanted to test whether removing indoor photos focused on museum objects, with little or no visible geographical information, would improve the model.
+- validation: 0.5017 (before: 0.5132; change: -0.0115)
+- per-city accuracy: Seoul 0.5072 (before: 0.5006, +0.0066); Busan 0.4496 (before: 0.4669, -0.0173); Tokyo 0.5171 (before: 0.5233, -0.0062); Osaka 0.4309 (before: 0.4615, -0.0306); Taipei 0.6037 (before: 0.6139, -0.0102)
+- what it means: 
+
 <02/11/2026> <filter_military> (Track A)
 
 
