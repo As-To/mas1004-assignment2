@@ -160,6 +160,14 @@ One possible explanation is that some of the car photos I removed were actually 
 - per-city accuracy: Seoul 0.5072 (before: 0.5006, +0.0066); Busan 0.4496 (before: 0.4669, -0.0173); Tokyo 0.5171 (before: 0.5233, -0.0062); Osaka 0.4309 (before: 0.4615, -0.0306); Taipei 0.6037 (before: 0.6139, -0.0102)
 - what it means: 
 
+<04/11/2026> <lr_1e4> (Track A)
+
+- changed: Changed the learning rate from `3e-4` to `1e-4` in both the AdamW optimizer and the OneCycleLR scheduler's `max_lr`. All other training settings, including the balanced recipe and selection, were kept unchanged.
+- why: I wanted to test whether a lower learning rate would improve validation accuracy by making smaller updates to the pretrained ResNet18 weights.
+- validation: 0.5068 (before: 0.5132; change: -0.0064)
+- per-city accuracy: Seoul 0.5125 (before: 0.5006, +0.0119); Busan 0.4468 (before: 0.4669, -0.0201); Tokyo 0.5107 (before: 0.5233, -0.0126); Osaka 0.4652 (before: 0.4615, +0.0037); Taipei 0.5988 (before: 0.6139, -0.0151)
+- what it means: 
+
 <02/11/2026> <filter_military> (Track A)
 
 
