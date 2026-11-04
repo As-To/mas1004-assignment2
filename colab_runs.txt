@@ -1,1 +1,1 @@
-python src/curate.py mistakes results/filter_museum_objects_seed0/model.onnx --every 2
+python src/official.py --tag lr_1e4
