@@ -1,1 +1,1 @@
-python src/official.py --tag lr_1e4
+python src/official.py --tag no_label_smoothing

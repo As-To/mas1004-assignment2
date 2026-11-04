@@ -53,13 +53,13 @@ def sample_weights(cities, paths):
 
 
 def make_optimizer(model):
-    return torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=0.05)
+    return torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.05)
 
 
 def make_scheduler(optimizer, total_steps):
     """Stepped once after every training step. total_steps is BUDGET // BATCH_SIZE."""
     return torch.optim.lr_scheduler.OneCycleLR(
-        optimizer, max_lr=1e-4, total_steps=total_steps, pct_start=0.15)
+        optimizer, max_lr=3e-4, total_steps=total_steps, pct_start=0.15)
 
 
 def mix(images, labels):
@@ -73,7 +73,7 @@ def mix(images, labels):
 
 
 def loss_fn(logits, targets):
-    return F.cross_entropy(logits, targets, label_smoothing=0.1)
+    return F.cross_entropy(logits, targets, label_smoothing=0.0)
 
 
 def on_step(step, total_steps, model, optimizer):
