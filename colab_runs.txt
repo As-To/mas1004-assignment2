@@ -1,1 +1,1 @@
-python src/official.py --tag no_label_smoothing
+python src/curate.py mistakes results/no_label_smoothing_seed0/model.onnx --every 2
