@@ -102,14 +102,27 @@ def shown(folder):
     return path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else str(folder)
 
 
+def selection_rows(selection):
+    """Load Track A's selected starter photos, retaining its exact paths."""
+    with open(selection, newline="", encoding="utf-8") as f:
+        rows = []
+        for row in csv.DictReader(f):
+            rel = Path(row["path"])
+            rows.append((ROOT / "data" / "starter" / "train" / rel, rel.parts[0].lower()))
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tag", required=True)
     ap.add_argument("--model", choices=sorted(MODELS), default="resnet18")
     ap.add_argument("--size", type=int, default=224)
     ap.add_argument("--folders", nargs="+", default=[str(ROOT / "data" / "starter" / "train")])
+    ap.add_argument("--selection", help="CSV of starter-training paths, as used by Track A")
     ap.add_argument("--epochs", type=int, default=4)
     ap.add_argument("--lr", type=float, default=3e-4)
+    ap.add_argument("--label-smoothing", type=float, default=0.1)
+    ap.add_argument("--budget", type=int, help="number of image presentations; overrides epochs")
     ap.add_argument("--batch-size", type=int, default=64)
     ap.add_argument("--balance", action="store_true", help="draw every city equally often")
     ap.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 2))
@@ -119,7 +132,8 @@ def main():
     args = ap.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-    rows = [r for folder in args.folders for r in rules.list_photos(folder)]
+    rows = selection_rows(ROOT / args.selection) if args.selection else [
+        r for folder in args.folders for r in rules.list_photos(folder)]
     for folder in map(Path, args.folders):
         if not folder.is_dir():
             print(f"{folder} does not exist; nothing from it is used")
@@ -144,23 +158,31 @@ def main():
     net, weights_name = build(args.model)
     net = net.to(device)
     opt = torch.optim.AdamW(net.parameters(), lr=args.lr, weight_decay=0.05)
-    sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=args.epochs * len(loader), pct_start=0.15)
+    total_steps = args.budget // args.batch_size if args.budget else args.epochs * len(loader)
+    sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=total_steps, pct_start=0.15)
     scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
     start = time.time()
-    for epoch in range(args.epochs):
+    loader_iter = iter(loader)
+    losses = []
+    for step in range(total_steps):
+        try:
+            x, y = next(loader_iter)
+        except StopIteration:
+            loader_iter = iter(loader)
+            x, y = next(loader_iter)
         net.train()
-        losses = []
-        for x, y in loader:
-            x, y = x.to(device), y.to(device)
-            with torch.autocast(device.type, dtype=torch.float16, enabled=device.type == "cuda"):
-                loss = nn.functional.cross_entropy(net(x), y, label_smoothing=0.1)
-            opt.zero_grad(set_to_none=True)
-            scaler.scale(loss).backward()
-            scaler.step(opt)
-            scaler.update()
-            sched.step()
-            losses.append(loss.item())
-        print(f"epoch {epoch + 1}/{args.epochs}: loss {np.mean(losses):.3f} ({time.time() - start:.0f}s)", flush=True)
+        x, y = x.to(device), y.to(device)
+        with torch.autocast(device.type, dtype=torch.float16, enabled=device.type == "cuda"):
+            loss = nn.functional.cross_entropy(net(x), y, label_smoothing=args.label_smoothing)
+        opt.zero_grad(set_to_none=True)
+        scaler.scale(loss).backward()
+        scaler.step(opt)
+        scaler.update()
+        sched.step()
+        losses.append(loss.item())
+        if (step + 1) % len(loader) == 0 or step + 1 == total_steps:
+            print(f"step {step + 1}/{total_steps}: loss {np.mean(losses):.3f} ({time.time() - start:.0f}s)", flush=True)
+            losses = []
     train_seconds = time.time() - start
 
     val = rules.list_photos(ROOT / "data" / "starter" / "val")[::args.val_every]
@@ -170,7 +192,8 @@ def main():
     out = ROOT / "results" / args.tag
     export_onnx(net, out / "model.onnx", args.size)
     info = {"image_size": args.size, "starting_weights": weights_name,
-            "data": " + ".join(shown(f) for f in args.folders), "summary": f"{args.model} at {args.size}, {args.epochs} epochs"}
+            "data": shown(args.selection) if args.selection else " + ".join(shown(f) for f in args.folders),
+            "summary": f"{args.model} at {args.size}, {total_steps} steps"}
     (out / "submission.json").write_text(json.dumps(info, indent=2))
     m = rules.measure_onnx(out / "model.onnx", args.size)
     print(f"wrote {out / 'model.onnx'}: {m['parameters'] / 1e6:.2f} million parameters, {m['gmacs']:.2f} billion multiply-adds")
@@ -189,9 +212,9 @@ def main():
         if new:
             w.writeheader()
         w.writerow({"finished": datetime.now().isoformat(timespec="seconds"), "track": "B", "tag": args.tag,
-                    "budget": args.epochs * len(loader) * args.batch_size, "val_score": round(score, 4),
+                    "budget": total_steps * args.batch_size, "val_score": round(score, 4),
                     **{c: round(per_city.get(c, 0), 4) for c in CITIES}, "train_seconds": round(train_seconds, 1),
-                    "device": str(device), "selection": f"{args.model} {args.size}px; " + " + ".join(shown(f) for f in args.folders),
+                    "device": str(device), "selection": f"{args.model} {args.size}px; " + (shown(args.selection) if args.selection else " + ".join(shown(f) for f in args.folders)),
                     "commit": git_commit()})
 
 
