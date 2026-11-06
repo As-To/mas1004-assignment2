@@ -223,4 +223,11 @@ Looking back at the training photos I removed, I wonder if some of them were act
 
 <31/10/2026> <jitter_01> (Track A)
 
+<06/11/2026> <mobilev3_large_no_label_smoothing_384> (Track B)
+
+- changed: Changed only the image resolution from 224x224 to 384x384. The pretrained MobileNetV3-Large architecture, selected training photos, balanced sampling, augmentations, label smoothing `0.0`, AdamW optimizer, learning rate `3e-4`, weight decay, batch size, scheduler, and 249,984-image training budget were kept unchanged.
+- why: I wanted to test whether increasing the image resolution would improve the MobileNetV3-Large model while keeping the rest of the experiment identical.
+- validation: 0.5663 (before: 0.5302; change: +0.0361)
+- per-city accuracy: Seoul 0.5552 (before: 0.5220, +0.0332); Busan 0.4978 (before: 0.4777, +0.0201); Tokyo 0.6364 (before: 0.5669, +0.0695); Osaka 0.4920 (before: 0.4558, +0.0362); Taipei 0.6500 (before: 0.6286, +0.0214)
+- what it means: 
 
