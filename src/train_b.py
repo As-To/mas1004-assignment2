@@ -16,6 +16,7 @@ anything. Every run adds a row to experiments.csv.
 """
 
 import argparse
+import collections
 import csv
 import json
 import os
@@ -112,6 +113,27 @@ def selection_rows(selection):
     return rows
 
 
+SOURCE_FACTORS = {"commons": 1.0, "osv": 1.5, "youtube": 1.5}
+
+
+def photo_source(path):
+    """Return the source named by a starter-photo filename prefix."""
+    name = Path(path).name.lower()
+    for source in SOURCE_FACTORS:
+        if name.startswith(source):
+            return source
+    raise ValueError(f"unrecognized photo source prefix: {Path(path).name}")
+
+
+def source_balanced_weights(rows):
+    """Equalize cities, then apply relative source factors within each city."""
+    totals = collections.defaultdict(float)
+    sources = [photo_source(path) for path, _ in rows]
+    for (_, city), source in zip(rows, sources):
+        totals[city] += SOURCE_FACTORS[source]
+    return [SOURCE_FACTORS[source] / totals[city] for (_, city), source in zip(rows, sources)], sources
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tag", required=True)
@@ -125,6 +147,8 @@ def main():
     ap.add_argument("--budget", type=int, help="number of image presentations; overrides epochs")
     ap.add_argument("--batch-size", type=int, default=64)
     ap.add_argument("--balance", action="store_true", help="draw every city equally often")
+    ap.add_argument("--source-weighted", action="store_true",
+                    help="within each city, favor YouTube and OSV sources 1.5x over Commons")
     ap.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 2))
     ap.add_argument("--submit", action="store_true", help="also copy the model into submission/")
     ap.add_argument("--val-every", type=int, default=1,
@@ -146,8 +170,23 @@ def main():
 
     tf = T.Compose([T.RandomResizedCrop(args.size, scale=(0.35, 1.0)), T.RandomHorizontalFlip(),
                     T.ColorJitter(0.2, 0.2, 0.2), T.ToTensor(), T.Normalize(MEAN, STD)])
+    if args.source_weighted and not args.balance:
+        raise SystemExit("--source-weighted requires --balance")
     if args.balance:
-        weights = [1.0 / counts[c] for _, c in rows]
+        if args.source_weighted:
+            weights, sources = source_balanced_weights(rows)
+            source_counts = {c: collections.Counter() for c in CITIES}
+            source_weight_totals = {c: collections.Counter() for c in CITIES}
+            for (_, city), source, weight in zip(rows, sources, weights):
+                source_counts[city][source] += 1
+                source_weight_totals[city][source] += weight
+            for city in CITIES:
+                proportions = ", ".join(
+                    f"{source} {source_weight_totals[city][source] / sum(source_weight_totals[city].values()):.4f}"
+                    for source in SOURCE_FACTORS if source_counts[city][source])
+                print(f"{city} source sampling proportions: {proportions}")
+        else:
+            weights = [1.0 / counts[c] for _, c in rows]
         sampler = torch.utils.data.WeightedRandomSampler(weights, len(rows), replacement=True)
         loader = DataLoader(Photos(rows, tf), batch_size=args.batch_size, sampler=sampler,
                             num_workers=args.workers, drop_last=True)
