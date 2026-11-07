@@ -1,2 +1,1 @@
-python src/train_b.py --tag mobilev3_large_no_label_smoothing_384_source_weighted --model mobilenet_v3_large --size 384 --selection track_a/selection.csv --balance --source-weighted --lr 3e-4 --label-smoothing 0.0 --batch-size 64 --budget 249984 --submit
-python src/check_submission.py --no-val
+python src/curate.py mistakes results/mobilev3_large_no_label_smoothing_384_source_weighted/model.onnx --size 384 --every 2
