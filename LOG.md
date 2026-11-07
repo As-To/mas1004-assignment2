@@ -231,3 +231,11 @@ Looking back at the training photos I removed, I wonder if some of them were act
 - per-city accuracy: Seoul 0.5552 (before: 0.5220, +0.0332); Busan 0.4978 (before: 0.4777, +0.0201); Tokyo 0.6364 (before: 0.5669, +0.0695); Osaka 0.4920 (before: 0.4558, +0.0362); Taipei 0.6500 (before: 0.6286, +0.0214)
 - what it means: 
 
+<07/11/2026> <mobilev3_large_no_label_smoothing_384_source_weighted> (Track B)
+
+- changed: Changed only the within-city source sampling weights: YouTube and OSV photos received 1.5x the relative weight of Wikimedia Commons photos. Equal-city sampling, the 384x384 pretrained MobileNetV3-Large model, selected photos, augmentations, optimizer, learning rate, label smoothing `0.0`, batch size, scheduler, and 249,984-image training budget were kept unchanged.
+- why: I wanted to test whether favoring YouTube and OSV photos, which often show street scenes, would improve the model while preserving equal sampling across the five cities.
+- validation: 0.5598 (before: 0.5663; change: -0.0065)
+- per-city accuracy: Seoul 0.5713 (before: 0.5552, +0.0161); Busan 0.4871 (before: 0.4978, -0.0107); Tokyo 0.6083 (before: 0.6364, -0.0281); Osaka 0.5080 (before: 0.4920, +0.0160); Taipei 0.6242 (before: 0.6500, -0.0258)
+- what it means: 
+
