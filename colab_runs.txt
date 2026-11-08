@@ -1,1 +1,2 @@
-python src/curate.py mistakes results/mobilev3_large_no_label_smoothing_384_source_weighted/model.onnx --size 384 --every 2
+python src/train_b.py --tag mobilev3_large_no_label_smoothing_384_long --model mobilenet_v3_large --size 384 --selection track_a/selection.csv --balance --lr 3e-4 --label-smoothing 0.0 --batch-size 64 --budget 499968 --submit
+python src/check_submission.py --no-val
