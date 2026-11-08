@@ -71,29 +71,14 @@ Tokyo: images 4, 21 (cars nit in the road)
 Osaka: images 2, 9, 13 (ordinary streets and roads)
 Taipei: images 9, 13, 16 (similar-looking roads)
 
-
-## Step 3 : balanced (Track A)
+# Track A experiments 
 
 <30/10/2026> <balanced> (Track A)
 - changed: In `sample_weights`, counted the photos for each city and returned a weight of `1 / city_count` for each photo, so every city is drawn equally often. No other training-recipe change was made.
 - why: I wanted to test whether drawing every city equally often would improve the baseline before making another change.
 - validation: 0.5062 (before: 0.4936; change: +0.0126)
 - per-city accuracy: Seoul 0.4982 (before: 0.5721, -0.0739); Busan 0.4475 (before: 0.3705, +0.0770); Tokyo 0.5017 (before: 0.6238, -0.1221); Osaka 0.4718 (before: 0.3548, +0.1170); Taipei 0.6121 (before: 0.5466, +0.0655)
-- what it means: The overall validation score increased by 0.0126. Accuracy increased for Busan, Osaka and Taipei, but decreased for Seoul and Tokyo. I expected balancing the cities to help Busan and Osaka, since they had some of the lowest scores in the baseline, and it did. But I was surprised by how much Seoul and Tokyo dropped. So I'm wondering if giving every city exactly the same weight is a bit too aggressive. I might try a less extreme balancing strategy later. For now, I want to test whether removing horizontal flipping helps preserve useful clues like signs and road layouts, without changing how often each city is sampled.
-
-The overall validation accuracy improved from 0.4936 to 0.5062. I decided to test balanced sampling because I had noticed large differences in the number of training photos available for each city.
-
-What I found particularly interesting was that Busan and Osaka improved significantly (+7.70 and +11.70 percentage points), while Seoul and Tokyo dropped (-7.39 and -12.21 points). When examining the baseline mistakes, I had noticed that many Busan photos were predicted as Seoul, and many Osaka photos as Tokyo. I wonder if the original imbalance made the model more likely to predict the cities with more training photos, and whether balanced sampling helped reduce this tendency.
-
-However, the large drops for Seoul and Tokyo make me wonder if equal sampling is too aggressive. A less extreme balancing strategy might offer a better compromise, although I would need to compare the confusion matrices to confirm my hypothesis.
-
-
-
-The overall validation accuracy improved from 0.4936 to 0.5062. I decided to test balanced sampling because I had noticed large differences in the number of training photos available for each city.
-
-What I found particularly interesting was that Busan and Osaka improved significantly (+7.70 and +11.70 percentage points), while Seoul and Tokyo dropped (-7.39 and -12.21 points). When examining the baseline mistakes, I noticed that many Busan photos were predicted as Seoul (e.g., images 1, 2 and 9), while many Osaka photos were predicted as Tokyo (e.g., images 1, 4 and 13). These mistakes often involved ordinary streets or roads that looked quite similar across cities in the same country.
-
-I wonder whether the original imbalance made the model more likely to predict Seoul and Tokyo, and whether balanced sampling helped reduce this tendency by giving Busan and Osaka more opportunities to be learned. However, the large drops for Seoul and Tokyo make me wonder if equal sampling is too aggressive. A less extreme balancing strategy might offer a better compromise, although I would need to compare the confusion matrices to confirm this hypothesis.
+- what it means: The overall validation score increased by 0.0126, from 0.4936 to 0.5062. I decided to test balanced sampling because I had noticed large differences in the number of training photos available for each city. When examining the baseline mistakes, I had noticed that many Busan photos were predicted as Seoul(e.g., images 1, 2 and 9), while many Osaka photos were predicted as Tokyo (e.g., images 1, 4 and 13). I wonder if the original imbalance made the model more likely to predict the cities with more training photos, and whether balanced sampling helped reduce this tendency. Accuracy increased for Busan, Osaka and Taipei, but decreased for Seoul and Tokyo. I expected balancing the cities to help Busan and Osaka, since they had some of the lowest scores in the baseline, and it did. But I was surprised by how much Seoul and Tokyo dropped. So I'm wondering if giving every city exactly the same weight is a bit too aggressive. I might try a less extreme balancing strategy later. For now, I want to test whether removing horizontal flipping helps preserve useful clues like signs and road layouts, without changing how often each city is sampled.
 
 
 <30/10/2026> <balanced_no_flip> (Track A)
@@ -109,16 +94,9 @@ I wonder whether the original imbalance made the model more likely to predict Se
 - why: I wanted to test whether less aggressive cropping would help preserve useful geographical context.
 - validation: 0.4885 (before: 0.5062; change: -0.0177); baseline seed 0: 0.4936 (change vs baseline: -0.0051)
 - per-city accuracy: Seoul 0.5101 (balanced before: 0.4982, +0.0119; baseline: 0.5721, -0.0620); Busan 0.4237 (balanced before: 0.4475, -0.0238; baseline: 0.3705, +0.0532); Tokyo 0.5001 (balanced before: 0.5017, -0.0016; baseline: 0.6238, -0.1237); Osaka 0.4243 (balanced before: 0.4718, -0.0475; baseline: 0.3548, +0.0695); Taipei 0.5840 (balanced before: 0.6121, -0.0281; baseline: 0.5466, +0.0374)
-- what it means: I expected less aggressive cropping to help the model by keeping more geographical context. However, accuracy dropped by 1.77 percentage points compared to balanced (from 0.5062 to 0.4880). My guess is that stronger cropping actually helps the model learn from smaller parts of the images and creates more variety during training. Since the model sees each photo several times (around 6 times), this variety might help prevent memorization. For now, I'll keep the original cropping and focus on removing training photos that contain little geographical information.
-I noticed that many validation mistakes involve outdoor scenes, while some training photos contain little geographical information. Since the training budget is fixed, I wonder whether removing these less useful photos could help the model spend more time learning from street scenes.
+- what it means: When examining the suspects from balanced_no_flip, I noticed that some photos contained potentially useful geographical clues spread across the image, such as the street signs and buildings in Osaka image 48 or the wider urban landscape in Tokyo image 43. I expected less aggressive cropping to help the model by keeping more geographical context. However, accuracy dropped by 1.77 percentage points compared to balanced (from 0.5062 to 0.4885). Osaka had the largest decrease (-4.75 percentage points), followed by Taipei (-2.81) and Busan (-2.38), while Seoul improved slightly. This surprised me because I expected preserving more context to help with street scenes. My guess is that stronger cropping actually helps the model learn from smaller parts of the images and creates more variety during training. Looking again at the suspects, I also noticed that some photos, such as Busan image 19, contain very few distinctive geographical clues even when viewed entirely. This makes me wonder whether preserving more of an image is not always beneficial. Another possible explanation is that stronger cropping helps the model learn from different parts of the same photo, creating more variety during training. Since each photo is presented around six times, this could help the model avoid relying too much on the same visual features.
+I noticed that many validation mistakes involve outdoor scenes, while some training photos contain little geographical information. Since the training budget is fixed, I wonder whether removing these less useful photos could help the model spend more time learning from street scenes. Also, I would be interested in testing cropping again at a higher image resolution to see whether preserving more visual detail changes the result.
 
-When examining the suspects from balanced_no_flip, I noticed that some photos contained potentially useful geographical clues spread across the image, such as the street signs and buildings in Osaka image 48 or the wider urban landscape in Tokyo image 43. I wondered whether aggressive cropping was removing some of this context, making the cities harder to distinguish.
-
-However, validation accuracy dropped from 0.5062 to 0.4885. Osaka had the largest decrease (-4.75 percentage points), followed by Taipei (-2.81) and Busan (-2.38), while Seoul improved slightly. This surprised me because I expected preserving more context to help with street scenes.
-
-Looking again at the suspects, I also noticed that some photos, such as Busan image 19, contain very few distinctive geographical clues even when viewed entirely. This makes me wonder whether preserving more of an image is not always beneficial. Another possible explanation is that stronger cropping helps the model learn from different parts of the same photo, creating more variety during training. Since each photo is presented around six times, this could help the model avoid relying too much on the same visual features.
-
-I would be interested in testing cropping again at a higher image resolution to see whether preserving more visual detail changes the result.
 
 <01/11/2026> <balanced_crop_05> (Track A)
 - changed: Changed only `T.RandomResizedCrop()` scale from `(0.35, 1.0)` to `(0.5, 1.0)`. Balanced equal-city sampling and horizontal flipping were kept unchanged.
@@ -197,17 +175,11 @@ Looking back at the training photos I removed, I wonder if some of them were act
 - why: I wanted to test whether removing label smoothing would improve validation accuracy by encouraging the model to make more confident predictions.
 - validation: 0.5151 (before: 0.5132; change: +0.0019)
 - per-city accuracy: Seoul 0.5368 (before: 0.5006, +0.0362); Busan 0.4662 (before: 0.4669, -0.0007); Tokyo 0.5125 (before: 0.5233, -0.0108); Osaka 0.4563 (before: 0.4615, -0.0052); Taipei 0.6037 (before: 0.6139, -0.0102)
-- what it means: 
+- what it means: From what I understand, label smoothing prevents the model from being encouraged to assign 100% confidence to the correct class during training. By removing it, I expected the model to make more confident predictions and possibly improve its accuracy. I was particularly interested in testing this because I had noticed that the model often confused visually similar cities, such as Tokyo and Osaka. I wondered whether encouraging stronger predictions for the correct class could help the model distinguish them better.
+The overall validation score improved only slightly, and most of the improvement came from Seoul (+3.62 percentage points), while the other cities stayed similar or became slightly worse. My guess is that, for some Seoul images, the model had already learned useful visual clues but was still confusing Seoul with other cities. Removing label smoothing may have helped it distinguish these images more clearly. However, it may also have made the model more confident in some incorrect predictions, which could explain why the improvement was not consistent across cities.
+The leaderboard score was lower than the local validation score (0.426 vs 0.515). I suspect this is partly due to domain shift: the model was trained on photos that may contain more distinctive city-specific features, while the leaderboard uses walking and driving video frames with more ordinary street scenes. The model may therefore rely on visual clues that are less useful on these new images. Removing label smoothing also reduces regularization, which could make this problem worse, although I cannot confirm that from these results alone.
 
-<05/11/20260> <Model_486_V3> (Track B)
-
-<02/11/2026> <filter_military> (Track A)
-
-<02/11/2026> <filter_indoors_seoul> (Track A)
-
-<02/11/2026> <filter_indoors_osaka> (Track A)
-
-<02/11/2026> <filter_indoors_taipei> (Track A)
+# Track B experiments 
 
 <05/11/2026> <mobilev3_large_no_label_smoothing> (Track B)
 
@@ -215,13 +187,10 @@ Looking back at the training photos I removed, I wonder if some of them were act
 - why: I wanted to test whether a pretrained MobileNetV3-Large could improve on my best Track A configuration while keeping the training data and settings the same.
 - validation: 0.5302 (before: 0.5151; change: +0.0151)
 - per-city accuracy: Seoul 0.5220 (before: 0.5368, -0.0148); Busan 0.4777 (before: 0.4662, +0.0115); Tokyo 0.5669 (before: 0.5125, +0.0544); Osaka 0.4558 (before: 0.4563, -0.0005); Taipei 0.6286 (before: 0.6037, +0.0249)
-- what it means: 
+- what it means:  I wanted to test whether MobileNetV3-Large could recognize the five cities better than ResNet18, especially since I had noticed in previous mistake sheets that the model often confused visually similar cities, such as Tokyo and Osaka.
+The overall validation score improved from 0.5151 to 0.5302. The biggest improvement came from Tokyo (+5.44 percentage points), followed by Taipei (+2.49 points). However, Seoul became slightly worse and Osaka barely changed. Since I kept the same training photos, sampling strategy and training budget, my guess is that MobileNetV3-Large's architecture and pretrained features helped it recognize some visual clues that ResNet18 was not using as effectively. However, the fact that Osaka barely improved suggests that changing the architecture alone was not enough to solve the confusion between Japanese cities.
+The leaderboard score was much lower than the local validation score (0.408 vs 0.530). This surprised me because MobileNetV3-Large performed better than ResNet18 on validation, but its leaderboard score was also lower than the previous Track A model (0.426). My guess is that MobileNetV3-Large learned features that worked well on the validation photos but were less useful on walking and driving video frames. This could be asign of domain shift, but it could also be a sign of overfitting to certain types of images.
 
-<31/10/2026> <balanced_crop_07_no_flip> (Track A)
-
-<31/10/2026> <street_filter> (Track A) -- deleting some of the photos to test the consequences 
-
-<31/10/2026> <jitter_01> (Track A)
 
 <06/11/2026> <mobilev3_large_no_label_smoothing_384> (Track B)
 
@@ -229,7 +198,8 @@ Looking back at the training photos I removed, I wonder if some of them were act
 - why: I wanted to test whether increasing the image resolution would improve the MobileNetV3-Large model while keeping the rest of the experiment identical.
 - validation: 0.5663 (before: 0.5302; change: +0.0361)
 - per-city accuracy: Seoul 0.5552 (before: 0.5220, +0.0332); Busan 0.4978 (before: 0.4777, +0.0201); Tokyo 0.6364 (before: 0.5669, +0.0695); Osaka 0.4920 (before: 0.4558, +0.0362); Taipei 0.6500 (before: 0.6286, +0.0214)
-- what it means: 
+- what it means: Increasing the resolution from 224×224 to 384×384 improved validation accuracy from 0.5302 to 0.5663. Unlike the previous experiments, all five cities improved. Tokyo gained the most (+6.95 percentage points).
+I think this supports my hypothesis that some useful city-specific details were being lost at 224×224. In earlier mistake sheets, I had noticed street scenes containing signs, buildings and other visual clues spread across the image. My guess is that the higher resolution made some of these smaller details easier for the model to recognize, especially in Japanese street scenes.
 
 <07/11/2026> <mobilev3_large_no_label_smoothing_384_source_weighted> (Track B)
 
@@ -237,5 +207,16 @@ Looking back at the training photos I removed, I wonder if some of them were act
 - why: I wanted to test whether favoring YouTube and OSV photos, which often show street scenes, would improve the model while preserving equal sampling across the five cities.
 - validation: 0.5598 (before: 0.5663; change: -0.0065)
 - per-city accuracy: Seoul 0.5713 (before: 0.5552, +0.0161); Busan 0.4871 (before: 0.4978, -0.0107); Tokyo 0.6083 (before: 0.6364, -0.0281); Osaka 0.5080 (before: 0.4920, +0.0160); Taipei 0.6242 (before: 0.6500, -0.0258)
-- what it means: 
+- what it means: Changing the sampling weights means that the model sees some types of images more frequently during training. I wanted to test whether giving more importance to YouTube and OSV photos would help the model generalize better to the leaderboard, since these sources often contain street scenes that may be closer to photos used for evaluation in the leaderbaord. This was particularly interesting to me because I had noticed a significant gap between local validation and leaderboard scores in my previous experiments.
+However, the overall validation score decreased from 0.5663 to 0.5598. The results were mixed: Seoul and Osaka improved by about 1.6 percentage points each, while Tokyo and Taipei dropped by 2.81 and 2.58 points. My guess is that street-oriented images may be more useful for some cities than others. Another possibility is that the Commons photos contain important visual clues that became less frequent during training. Also, images from the same video may look very similar, so sampling them more often might reduce the variety of scenes the model learns from.
+The leaderboard score also decreased, from 0.433 to 0.426. I had hoped that favoring YouTube and OSV photos would help reduce the gap between local validation and leaderboard performance, but this did not happen. My guess is that simply increasing the frequency of these sources was not enough to make the training data more representative of the leaderboard videos. Some YouTube and OSV images may still be quite different from the actual evaluation frames, or the reduced frequency of Commons photos may have removed useful variety from training. I will not keep this change for my final release.
 
+<08/11/2026> <mobilev3_large_no_label_smoothing_384_long> (Track B)
+
+- changed: Doubled the training budget from 249,984 to 499,968 image presentations, increasing the training duration from 3,906 to 7,812 optimizer steps. The OneCycleLR scheduler was extended to cover all 7,812 steps; the model, resolution, selected photos, balanced sampling, augmentations, optimizer, learning rate, weight decay, label smoothing `0.0`, and batch size were kept unchanged.
+- why: I wanted to test whether training for twice as long would improve validation accuracy.
+- validation: 0.5746 (before: 0.5663; change: +0.0083)
+- per-city accuracy: Seoul 0.5815 (before: 0.5552, +0.0263); Busan 0.4863 (before: 0.4978, -0.0115); Tokyo 0.6789 (before: 0.6364, +0.0425); Osaka 0.5009 (before: 0.4920, +0.0089); Taipei 0.6255 (before: 0.6500, -0.0245)
+- what it means: Training for twice as long improved overall validation accuracy from 0.5663 to 0.5746 (+0.83 percentage points). However, the improvement was not consistent across all cities. Tokyo improved the most (+4.25 points), followed by Seoul (+2.63 points), while Busan and Taipei performed worse.
+My guess is that the additional training helped the model learn more useful visual details for some cities, especially Tokyo. However, the decrease in Busan and Taipei suggests that longer training does not necessarily benefit every city equally. It is also possible that the model started to overfit some patterns in the training data.
+Overall, the improvement was relatively small considering that I doubled the training time. I would need to compare the leaderboard score with B2 to see whether the additional training also improved generalization to unseen street scenes.
