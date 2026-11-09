@@ -220,3 +220,11 @@ The leaderboard score also decreased, from 0.433 to 0.426. I had hoped that favo
 - what it means: Training for twice as long improved overall validation accuracy from 0.5663 to 0.5746 (+0.83 percentage points). However, the improvement was not consistent across all cities. Tokyo improved the most (+4.25 points), followed by Seoul (+2.63 points), while Busan and Taipei performed worse.
 My guess is that the additional training helped the model learn more useful visual details for some cities, especially Tokyo. However, the decrease in Busan and Taipei suggests that longer training does not necessarily benefit every city equally. It is also possible that the model started to overfit some patterns in the training data.
 Overall, the improvement was relatively small considering that I doubled the training time. I would need to compare the leaderboard score with B2 to see whether the additional training also improved generalization to unseen street scenes.
+
+<09/11/2026> <mobilev3_large_no_label_smoothing_448> (Track B)
+
+- changed: Changed only the image resolution from 384x384 to 448x448. The pretrained MobileNetV3-Large architecture, selected photos, balanced city sampling, augmentations, optimizer, learning rate, weight decay, label smoothing `0.0`, batch size, scheduler, and 249,984-image training budget were kept unchanged.
+- why: I wanted to test whether increasing the image resolution from 384x384 to 448x448 would improve validation accuracy.
+- validation: 0.5706 (before: 0.5663; change: +0.0043)
+- per-city accuracy: Seoul 0.5700 (before: 0.5552, +0.0148); Busan 0.4878 (before: 0.4978, -0.0100); Tokyo 0.6357 (before: 0.6364, -0.0007); Osaka 0.5207 (before: 0.4920, +0.0287); Taipei 0.6389 (before: 0.6500, -0.0111)
+- what it means: 

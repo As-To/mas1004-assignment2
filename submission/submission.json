@@ -1,6 +1,6 @@
 {
-  "image_size": 384,
+  "image_size": 448,
   "starting_weights": "torchvision mobilenet_v3_large IMAGENET1K_V2",
   "data": "track_a/selection.csv",
-  "summary": "mobilenet_v3_large at 384, 7812 steps"
+  "summary": "mobilenet_v3_large at 448, 3906 steps"
 }
